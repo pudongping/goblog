@@ -65,8 +65,8 @@ func main() {
 	router.Use(forceHTMLMiddleware)
 
 	// 通过命名路由获取 URL 示例
-	homeURL, _ := router.Get("home").URL()
-	fmt.Println("homeURL: ", homeURL)
+	// homeURL, _ := router.Get("home").URL()
+	// fmt.Println("homeURL: ", homeURL)
 
 	articleURL, _ := router.Get("articles.show").URL("id", "23")
 	fmt.Println("articleURL: ", articleURL)
