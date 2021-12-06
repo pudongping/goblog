@@ -44,7 +44,7 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request)  {
     <title>创建文章 —— 我的技术博客</title>
 </head>
 <body>
-    <form action="%s" method="post">
+    <form action="%s?test=data" method="post">
         <p><input type="text" name="title"></p>
         <p><textarea name="body" cols="30" rows="10"></textarea></p>
         <p><button type="submit">提交</button></p>
@@ -56,8 +56,22 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request)  {
 	fmt.Fprintf(w, html, storeURL)
 }
 
+// 创建博文时，提交数据
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "创建新的文章")
+
+	// 从请求中解析请求参数
+	err := r.ParseForm()
+	if err != nil {
+		// 解析错误
+		fmt.Fprint(w, "请提供正确的数据！")
+		return
+	}
+
+	title := r.PostForm.Get("title")
+	fmt.Fprintf(w, "POST PostForm: %v <br>", r.PostForm)
+	fmt.Fprintf(w, "POST Form: %v <br>", r.Form)
+	fmt.Fprintf(w, "title 的值为: %v", title)
+
 }
 
 // 强制内容类型为 HTML 的中间件
@@ -91,6 +105,7 @@ func main() {
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	// 创建博文
 	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
+	// 创建博文，提交数据
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 
 	// 自定义 404 页面
