@@ -39,7 +39,7 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "访问文章列表")
 }
 
-func articlesCreateHandler(w http.ResponseWriter, r *http.Request)  {
+func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	html := `
 <!DOCTYPE html>
 <html lang="en">
@@ -62,8 +62,8 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request)  {
 // ArticlesFormData 创建博文表单数据，用于给模版文件传输变量时使用
 type ArticlesFormData struct {
 	Title, Body string
-	URL *url.URL
-	Errors map[string]string
+	URL         *url.URL
+	Errors      map[string]string
 }
 
 // 创建博文时，提交数据
@@ -73,7 +73,7 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.PostFormValue("body")
 
 	errors := make(map[string]string)
-	titleLen := utf8.RuneCountInString(title)  // 计算 title 的长度
+	titleLen := utf8.RuneCountInString(title) // 计算 title 的长度
 	bodyLen := utf8.RuneCountInString(body)
 
 	// 验证标题
@@ -140,7 +140,6 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	}
-
 
 }
 
