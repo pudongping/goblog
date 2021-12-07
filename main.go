@@ -178,7 +178,7 @@ func main() {
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 
 	// 自定义 404 页面
-	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
+	//router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
 	// 中间件：强制内容类型为 HTML
 	//router.Use(forceHTMLMiddleware)
