@@ -190,5 +190,5 @@ func main() {
 	articleURL, _ := router.Get("articles.show").URL("id", "23")
 	fmt.Println("articleURL: ", articleURL)
 
-	http.ListenAndServe(":3000", removeTrailingSlash(router))
+	//http.ListenAndServe(":3000", removeTrailingSlash(router))
 }
