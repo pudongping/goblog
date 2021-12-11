@@ -47,6 +47,8 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 		URL:    storeURL,
 		Errors: nil,
 	}
+	// 可以使用类似于以下的语法修改默认的模版标识符，比如这里将默认的 {{}} 修改成 {[]}
+	// template.New("test").Delims("{[", "]}").ParseFiles("filename.gohtml")
 	tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
 	if err != nil {
 		panic(err)
