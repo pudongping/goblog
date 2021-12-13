@@ -156,13 +156,9 @@ type ArticlesFormData struct {
 	Errors      map[string]string
 }
 
-// 创建博文时，提交数据
-func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-
-	title := r.PostFormValue("title")
-	body := r.PostFormValue("body")
-
+func validateArticleFormData(title, body string) map[string]string {
 	errors := make(map[string]string)
+
 	titleLen := utf8.RuneCountInString(title) // 计算 title 的长度
 	bodyLen := utf8.RuneCountInString(body)
 
@@ -179,6 +175,17 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	} else if bodyLen < 10 {
 		errors["body"] = "内容长度需要大于或等于 10 个字节"
 	}
+
+	return errors
+}
+
+// 创建博文时，提交数据
+func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
+
+	title := r.PostFormValue("title")
+	body := r.PostFormValue("body")
+
+	errors := validateArticleFormData(title, body)
 
 	// 检查是否含有错误
 	if len(errors) == 0 {
@@ -295,24 +302,7 @@ func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 		title := r.PostFormValue("title")
 		body := r.PostFormValue("body")
 
-		errors := make(map[string]string)
-
-		titleLen := utf8.RuneCountInString(title) // 计算 title 的长度
-		bodyLen := utf8.RuneCountInString(body)
-
-		// 验证标题
-		if title == "" {
-			errors["title"] = "标题不能为空"
-		} else if titleLen < 3 || titleLen > 40 {
-			errors["title"] = "标题长度需介于 3-40"
-		}
-
-		// 验证内容
-		if body == "" {
-			errors["body"] = "内容不能为空"
-		} else if bodyLen < 10 {
-			errors["body"] = "内容长度需要大于或等于 10 个字节"
-		}
+		errors := validateArticleFormData(title, body)
 
 		if len(errors) == 0 {
 
