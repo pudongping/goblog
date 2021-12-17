@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
 	"github.com/pudongping/goblog/app/models/article"
@@ -21,7 +20,7 @@ type ArticlesController struct {
 // Show 文章详情页面
 func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	// 1. 获取 URL 参数
-	id := mux.Vars(r)["id"]
+	id := route.GetRouteVariable("id", r)
 
 	// 2. 读取对应的文章数据
 	article, err := article.Get(id)
