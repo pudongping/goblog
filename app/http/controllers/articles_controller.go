@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/pudongping/goblog/pkg/logger"
@@ -46,4 +47,5 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(w, article)
 		logger.LogError(err)
 	}
+
 }
