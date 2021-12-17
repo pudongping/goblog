@@ -27,17 +27,6 @@ type Article struct {
 	ID          int64
 }
 
-// Link 方法用来生成文章链接
-func (a Article) Link() string {
-	showURL, err := router.Get("articles.show").URL("id", strconv.FormatInt(a.ID, 10))
-	if err != nil {
-		logger.LogError(err)
-		return ""
-	}
-
-	return showURL.String()
-}
-
 func (a Article) Delete() (rowsAffected int64, err error) {
 	rs, err := db.Exec("delete from articles where id = " + strconv.FormatInt(a.ID, 10))
 
@@ -421,7 +410,6 @@ func main() {
 	router = bootstrap.SetupRoute()
 
 	// 在 Gorilla Mux 中，如果未指定请求方法，默认会匹配所有方法
-	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	// 创建博文
 	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
 	// 创建博文，提交数据
