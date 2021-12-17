@@ -42,41 +42,6 @@ func (a Article) Delete() (rowsAffected int64, err error) {
 	return 0, nil
 }
 
-func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-
-	// 1. 执行查询语句，返回一个结果集
-	rows, err := db.Query("select * from articles")
-	logger.LogError(err)
-
-	// 使用 rows.Next() 遍历数据，遍历到最后内部遇到 EOF 错误，会自动调用 rows.Close() 将 SQL 连接关闭
-	defer rows.Close()
-
-	var articles []Article
-	// 2. 循环读取美国
-	for rows.Next() {
-		var article Article
-		// 2.1 扫描每一行的结果并赋值到一个 article 对象中
-		err := rows.Scan(&article.ID, &article.Title, &article.Body)
-		logger.LogError(err)
-
-		// 2.2 将 article 追加到 articles 的这个数组中
-		articles = append(articles, article)
-	}
-
-	// 2.3 检测遍历时，是否发生错误
-	err = rows.Err()
-	logger.LogError(err)
-
-	// 3. 加载模版
-	tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
-	logger.LogError(err)
-
-	// 4. 渲染模版，将所有文章的数据传输进去
-	err = tmpl.Execute(w, articles)
-	logger.LogError(err)
-
-}
-
 func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	storeURL, _ := router.Get("articles.store").URL()
 	data := ArticlesFormData{
