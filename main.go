@@ -416,6 +416,8 @@ func main() {
 	database.Initialize()
 	db = database.DB
 
+	// 初始化 gorm
+	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 
 	// 在 Gorilla Mux 中，如果未指定请求方法，默认会匹配所有方法
