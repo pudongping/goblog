@@ -72,49 +72,6 @@ func validateArticleFormData(title, body string) map[string]string {
 	return errors
 }
 
-// 创建博文时，提交数据
-func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-
-	title := r.PostFormValue("title")
-	body := r.PostFormValue("body")
-
-	errors := validateArticleFormData(title, body)
-
-	// 检查是否含有错误
-	if len(errors) == 0 {
-		lastInsertID, err := saveArticleToDB(title, body)
-		if lastInsertID > 0 {
-			// 第二个参数表示为转换为十进制
-			fmt.Fprintf(w, "插入成功， ID 为"+strconv.FormatInt(lastInsertID, 10))
-		} else {
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "500 服务器内部错误")
-		}
-	} else {
-
-		storeURL, _ := router.Get("articles.store").URL()
-
-		// 构建 ArticlesFormData 里的数据，storeURL 是通过路由参数生成的 URL 路径
-		data := ArticlesFormData{
-			Title:  title,
-			Body:   body,
-			URL:    storeURL,
-			Errors: errors,
-		}
-		tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-		if err != nil {
-			panic(err)
-		}
-
-		err = tmpl.Execute(w, data)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-}
-
 // getArticleByID 通过文章 id 获取文章
 func getArticleByID(id string) (Article, error) {
 	article := Article{}
@@ -283,39 +240,6 @@ func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func saveArticleToDB(title, body string) (int64, error) {
-
-	// 变量初始化
-	var (
-		id   int64
-		err  error
-		rs   sql.Result
-		stmt *sql.Stmt
-	)
-
-	// 1. 获取一个 prepare 声明语句
-	stmt, err = db.Prepare("insert into articles (title, body) values (?, ?)")
-	if err != nil {
-		return 0, err
-	}
-
-	// 2. 在此函数运行结束后关闭此语句，防止占用 sql 连接
-	defer stmt.Close()
-
-	// 3. 执行请求，传参进入绑定的内容
-	rs, err = stmt.Exec(title, body)
-	if err != nil {
-		return 0, err
-	}
-
-	// 4. 插入成功的话，会返回自增 ID
-	if id, err = rs.LastInsertId(); id > 0 {
-		return id, nil
-	}
-
-	return 0, err
-}
-
 // 强制内容类型为 HTML 的中间件
 func forceHTMLMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -354,8 +278,6 @@ func main() {
 	router = bootstrap.SetupRoute()
 
 	// 在 Gorilla Mux 中，如果未指定请求方法，默认会匹配所有方法
-	// 创建博文，提交数据
-	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 	// 编辑文章
 	router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
 	// 编辑文章，提交数据

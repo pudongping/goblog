@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
+	"unicode/utf8"
 
 	"gorm.io/gorm"
 
@@ -107,7 +109,71 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request)  {
 
 }
 
+func validateArticleFormData(title, body string) map[string]string {
+	errors := make(map[string]string)
+
+	titleLen := utf8.RuneCountInString(title) // 计算 title 的长度
+	bodyLen := utf8.RuneCountInString(body)
+
+	// 验证标题
+	if title == "" {
+		errors["title"] = "标题不能为空"
+	} else if titleLen < 3 || titleLen > 40 {
+		errors["title"] = "标题长度需介于 3-40"
+	}
+
+	// 验证内容
+	if body == "" {
+		errors["body"] = "内容不能为空"
+	} else if bodyLen < 10 {
+		errors["body"] = "内容长度需要大于或等于 10 个字节"
+	}
+
+	return errors
+}
+
 // Store 文章创建页面
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request)  {
+
+	title := r.PostFormValue("title")
+	body := r.PostFormValue("body")
+
+	errors := validateArticleFormData(title, body)
+
+	// 检查是否含有错误
+	if len(errors) == 0 {
+		_article := article.Article{
+			Title:     title,
+			Body:      body,
+		}
+		// 创建文章
+		_article.Create()
+
+		if _article.ID > 0 {
+			// 第二个参数表示为转换为十进制
+			fmt.Fprint(w, "插入成功， ID 为"+strconv.FormatUint(_article.ID, 10))
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "500 服务器内部错误")
+		}
+	} else {
+
+		storeURL := route.Name2URL("articles.store")
+
+		// 构建 ArticlesFormData 里的数据，storeURL 是通过路由参数生成的 URL 路径
+		data := ArticlesFormData{
+			Title:  title,
+			Body:   body,
+			URL:    storeURL,
+			Errors: errors,
+		}
+		tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
+
+		logger.LogError(err)
+
+		err = tmpl.Execute(w, data)
+		logger.LogError(err)
+
+	}
 
 }
