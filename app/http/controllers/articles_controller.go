@@ -36,6 +36,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		logger.LogError(err)
 
 		// 3. 渲染模版，将所有文章的数据传输进去
+		// Execute() 在执行时会设置正确的 HTML 标头
 		err = tmpl.Execute(w, articles)
 		logger.LogError(err)
 	}
