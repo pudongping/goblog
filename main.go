@@ -3,12 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"html/template"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -42,36 +39,6 @@ func (a Article) Delete() (rowsAffected int64, err error) {
 	return 0, nil
 }
 
-// ArticlesFormData 创建博文表单数据，用于给模版文件传输变量时使用
-type ArticlesFormData struct {
-	Title, Body string
-	URL         *url.URL
-	Errors      map[string]string
-}
-
-func validateArticleFormData(title, body string) map[string]string {
-	errors := make(map[string]string)
-
-	titleLen := utf8.RuneCountInString(title) // 计算 title 的长度
-	bodyLen := utf8.RuneCountInString(body)
-
-	// 验证标题
-	if title == "" {
-		errors["title"] = "标题不能为空"
-	} else if titleLen < 3 || titleLen > 40 {
-		errors["title"] = "标题长度需介于 3-40"
-	}
-
-	// 验证内容
-	if body == "" {
-		errors["body"] = "内容不能为空"
-	} else if bodyLen < 10 {
-		errors["body"] = "内容长度需要大于或等于 10 个字节"
-	}
-
-	return errors
-}
-
 // getArticleByID 通过文章 id 获取文章
 func getArticleByID(id string) (Article, error) {
 	article := Article{}
@@ -79,118 +46,6 @@ func getArticleByID(id string) (Article, error) {
 	// 传参应与数据表字段的顺序保持一致
 	err := db.QueryRow(query, id).Scan(&article.ID, &article.Title, &article.Body)
 	return article, err
-}
-
-func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
-
-	// 1. 获取 URL 参数
-	id := getRouteVariable("id", r)
-
-	// 2. 读取对应的文章数据
-	article, err := getArticleByID(id)
-
-	// 3. 如果出现错误
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// 3.1 数据未找到
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "404 文章未找到")
-		} else {
-			// 3.2 数据库错误
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-		// 4. 读取成功，显示表单
-		// 使用路由命名功能获取到 URL
-		updateURL, _ := router.Get("articles.update").URL("id", id)
-		data := ArticlesFormData{
-			Title:  article.Title,
-			Body:   article.Body,
-			URL:    updateURL,
-			Errors: nil,
-		}
-		tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-		logger.LogError(err)
-
-		err = tmpl.Execute(w, data)
-		logger.LogError(err)
-	}
-
-}
-
-func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
-	// 1. 获取 URL 参数
-	id := getRouteVariable("id", r)
-
-	// 2. 读取对应的文章数据
-	_, err := getArticleByID(id)
-
-	// 3. 如果出现错误
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// 3.1 数据未找到
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "404 文章未找到")
-		} else {
-			// 3.2 数据库错误
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-		// 4. 未出现错误
-
-		// 4.1 表单验证
-		title := r.PostFormValue("title")
-		body := r.PostFormValue("body")
-
-		errors := validateArticleFormData(title, body)
-
-		if len(errors) == 0 {
-
-			// 4.2 表单验证通过，更新数据
-			query := "update articles set title = ?, body = ? where id = ?"
-			rs, err := db.Exec(query, title, body, id)
-
-			if err != nil {
-				logger.LogError(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, "500 服务器内部错误")
-			}
-
-			// 更新成功，跳转到文章详情页
-			// 通过返回的影响行数来判断是否更新成功
-			if n, _ := rs.RowsAffected(); n > 0 {
-				showURL, _ := router.Get("articles.show").URL("id", id)
-				// 跳转到文章详情页
-				http.Redirect(w, r, showURL.String(), http.StatusFound)
-			} else {
-				fmt.Fprint(w, "您没有做任何更改！")
-			}
-
-		} else {
-
-			// 4.3 表单验证不通过，显示理由
-
-			updateURL, _ := router.Get("articles.update").URL("id", id)
-			data := ArticlesFormData{
-				Title:  title,
-				Body:   body,
-				URL:    updateURL,
-				Errors: errors,
-			}
-			tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-			logger.LogError(err)
-
-			err = tmpl.Execute(w, data)
-			logger.LogError(err)
-
-		}
-
-	}
-
 }
 
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -278,10 +133,6 @@ func main() {
 	router = bootstrap.SetupRoute()
 
 	// 在 Gorilla Mux 中，如果未指定请求方法，默认会匹配所有方法
-	// 编辑文章
-	router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
-	// 编辑文章，提交数据
-	router.HandleFunc("/articles/{id:[0-9]+}", articlesUpdateHandler).Methods("POST").Name("articles.update")
 	// 删除文章
 	router.HandleFunc("/articles/{id:[0-9]+}/delete", articlesDeleteHandler).Methods("POST").Name("articles.delete")
 
