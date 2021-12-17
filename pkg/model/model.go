@@ -4,6 +4,7 @@ import (
 	// GORM 的 MySQL 数据库驱动导入
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 
 	"github.com/pudongping/goblog/pkg/logger"
 )
@@ -21,7 +22,14 @@ func ConnectDB() *gorm.DB {
 	})
 
 	// 准备数据库连接池
-	DB, err = gorm.Open(config, &gorm.Config{})
+	DB, err = gorm.Open(config, &gorm.Config{
+		// 允许我们在命令行里查看请求的 sql 信息
+		// Silent —— 静默模式，不打印任何信息
+		// Error —— 发生错误了才打印
+		// Warn —— 发生警告级别以上的错误才打印
+		// Info —— 打印所有信息，包括 SQL 语句
+		Logger: gormlogger.Default.LogMode(gormlogger.Info),
+	})
 
 	logger.LogError(err)
 
