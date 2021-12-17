@@ -42,27 +42,6 @@ func (a Article) Delete() (rowsAffected int64, err error) {
 	return 0, nil
 }
 
-func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
-	storeURL, _ := router.Get("articles.store").URL()
-	data := ArticlesFormData{
-		Title:  "",
-		Body:   "",
-		URL:    storeURL,
-		Errors: nil,
-	}
-	// 可以使用类似于以下的语法修改默认的模版标识符，比如这里将默认的 {{}} 修改成 {[]}
-	// template.New("test").Delims("{[", "]}").ParseFiles("filename.gohtml")
-	tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-	if err != nil {
-		panic(err)
-	}
-
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		panic(err)
-	}
-}
-
 // ArticlesFormData 创建博文表单数据，用于给模版文件传输变量时使用
 type ArticlesFormData struct {
 	Title, Body string
@@ -375,8 +354,6 @@ func main() {
 	router = bootstrap.SetupRoute()
 
 	// 在 Gorilla Mux 中，如果未指定请求方法，默认会匹配所有方法
-	// 创建博文
-	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
 	// 创建博文，提交数据
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 	// 编辑文章
