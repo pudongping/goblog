@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"unicode/utf8"
 
@@ -32,12 +33,24 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
 		// 2. 加载模版
-		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+
+		// 2.0 设置模版相对路径
+		viewDir := "resources/views"
+
+		// 2.1 所有布局模板文件 Slice
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
 		logger.LogError(err)
 
-		// 3. 渲染模版，将所有文章的数据传输进去
-		// Execute() 在执行时会设置正确的 HTML 标头
-		err = tmpl.Execute(w, articles)
+		// 2.2 在 Slice 里新增我们的目标文件
+		newFiles := append(files, viewDir+"/articles/index.gohtml")
+
+		// 2.3 解析模板文件
+		tmpl, err := template.ParseFiles(newFiles...)
+		logger.LogError(err)
+
+		// 2.4 渲染模板，将所有文章的数据传输进去
+		// myapp 是模板的名称（这是模版关键词 define 定义的模版名称，不是模版文件名称）
+		err = tmpl.ExecuteTemplate(w, "myapp", articles)
 		logger.LogError(err)
 	}
 
