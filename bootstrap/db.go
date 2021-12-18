@@ -3,11 +3,15 @@ package bootstrap
 import (
 	"time"
 
+	"gorm.io/gorm"
+
+	"github.com/pudongping/goblog/app/models/article"
+	"github.com/pudongping/goblog/app/models/user"
 	"github.com/pudongping/goblog/pkg/model"
 )
 
 // SetupDB 初始化数据库和 ORM
-func SetupDB()  {
+func SetupDB() {
 
 	// 建立数据库连接池
 	db := model.ConnectDB()
@@ -22,5 +26,18 @@ func SetupDB()  {
 	sqlDB.SetMaxIdleConns(25)
 	// 设置每个链接的过期时间
 	sqlDB.SetConnMaxLifetime(5 * time.Minute)
+
+	// 创建和维护数据表结构
+	migration(db)
+}
+
+// 自动迁移
+func migration(db *gorm.DB) {
+
+	// 自动迁移
+	db.AutoMigrate(
+		&user.User{},
+		&article.Article{},
+	)
 
 }
