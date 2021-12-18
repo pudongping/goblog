@@ -36,7 +36,9 @@ func RegisterWebRoutes(r *mux.Router) {
 
 	// 用户认证
 	auc := new(controllers.AuthController)
+	// 注册页面
 	r.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
+	// 处理注册逻辑
 	r.HandleFunc("/auth/do-register", auc.DoRegister).Methods("POST").Name("auth.doregister")
 
 	// 设置静态资源路由
