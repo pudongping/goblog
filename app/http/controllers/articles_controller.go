@@ -78,14 +78,28 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// 4. 读取成功，显示文章
+
+		// 4.0 设置模板相对路径
+		viewDir := "resources/views"
+
+		// 4.1 所有布局模板文件 Slice
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
+		logger.LogError(err)
+
+		// 4.2 在 Slice 里新增我们的目标文件
+		newFiles := append(files, viewDir+"/articles/show.gohtml")
+
+		// 4.3 解析模板文件
 		tmpl, err := template.New("show.gohtml").
 			Funcs(template.FuncMap{
 				"RouteName2URL":  route.Name2URL,
 				"Uint64ToString": types.Uint64ToString,
 			}).
-			ParseFiles("resources/views/articles/show.gohtml")
+			ParseFiles(newFiles...)
 		logger.LogError(err)
-		err = tmpl.Execute(w, article)
+
+		// 4.4 渲染模板，将所有文章的数据传输进去
+		err = tmpl.ExecuteTemplate(w, "myapp", article)
 		logger.LogError(err)
 	}
 
@@ -308,7 +322,7 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // Delete 删除文章
-func (*ArticlesController) Delete(w http.ResponseWriter, r *http.Request)  {
+func (*ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// 1. 获取 URL 参数
 	id := route.GetRouteVariable("id", r)
