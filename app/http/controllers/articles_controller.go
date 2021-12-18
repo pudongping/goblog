@@ -73,27 +73,7 @@ type ArticlesFormData struct {
 
 // Create 文章创建页面
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
-
-	storeURL := route.Name2URL("articles.store")
-	data := ArticlesFormData{
-		Title:  "",
-		Body:   "",
-		URL:    storeURL,
-		Errors: nil,
-	}
-
-	// 可以使用类似于以下的语法修改默认的模版标识符，比如这里将默认的 {{}} 修改成 {[]}
-	// template.New("test").Delims("{[", "]}").ParseFiles("filename.gohtml")
-	tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-	if err != nil {
-		panic(err)
-	}
-
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		panic(err)
-	}
-
+	view.Render(w, "articles.create", ArticlesFormData{})
 }
 
 func validateArticleFormData(title, body string) map[string]string {
@@ -145,21 +125,11 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 
-		storeURL := route.Name2URL("articles.store")
-
-		// 构建 ArticlesFormData 里的数据，storeURL 是通过路由参数生成的 URL 路径
-		data := ArticlesFormData{
+		view.Render(w, "articles.create", ArticlesFormData{
 			Title:  title,
 			Body:   body,
-			URL:    storeURL,
 			Errors: errors,
-		}
-		tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-
-		logger.LogError(err)
-
-		err = tmpl.Execute(w, data)
-		logger.LogError(err)
+		})
 
 	}
 
