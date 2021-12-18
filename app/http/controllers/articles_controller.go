@@ -13,7 +13,6 @@ import (
 	"github.com/pudongping/goblog/app/models/article"
 	"github.com/pudongping/goblog/pkg/logger"
 	"github.com/pudongping/goblog/pkg/route"
-	"github.com/pudongping/goblog/pkg/types"
 )
 
 // ArticlesController 文章相关页面
@@ -93,7 +92,6 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.New("show.gohtml").
 			Funcs(template.FuncMap{
 				"RouteName2URL":  route.Name2URL,
-				"Uint64ToString": types.Uint64ToString,
 			}).
 			ParseFiles(newFiles...)
 		logger.LogError(err)
