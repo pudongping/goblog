@@ -45,7 +45,7 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 		// 3. 表单不通过，重新显示表单
 		view.RenderSimple(w, view.D{
 			"Errors": errs,
-			"User": _user,
+			"User":   _user,
 		}, "auth.register")
 
 	} else {
@@ -60,5 +60,4 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// 3. 表单不通过，则重新显示表单
 }
