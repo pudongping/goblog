@@ -40,6 +40,10 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
 	// 处理注册逻辑
 	r.HandleFunc("/auth/do-register", auc.DoRegister).Methods("POST").Name("auth.doregister")
+	// 登录显示页面
+	r.HandleFunc("/auth/login", auc.Login).Methods("GET").Name("auth.login")
+	// 处理登录逻辑
+	r.HandleFunc("/auth/dologin", auc.DoLogin).Methods("POST").Name("auth.dologin")
 
 	// 设置静态资源路由
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
