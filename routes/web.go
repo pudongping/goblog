@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/pudongping/goblog/app/http/controllers"
+	"github.com/pudongping/goblog/app/http/middlewares"
 )
 
 // RegisterWebRoutes 注册网页相关路由
@@ -51,4 +52,6 @@ func RegisterWebRoutes(r *mux.Router) {
 
 	// 中间件：强制内容类型为 HTML
 	// r.Use(middlewares.ForceHTML)
+	// 中间件：开始会话
+	r.Use(middlewares.StartSession)
 }
