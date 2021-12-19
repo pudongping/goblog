@@ -6,6 +6,7 @@ import (
 
 	"github.com/pudongping/goblog/app/models/user"
 	"github.com/pudongping/goblog/app/requests"
+	"github.com/pudongping/goblog/pkg/auth"
 	"github.com/pudongping/goblog/pkg/view"
 )
 
@@ -69,5 +70,20 @@ func (*AuthController) Login(w http.ResponseWriter, r *http.Request) {
 
 // DoLogin 处理登录表单提交
 func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request) {
-	//
+	// 1. 初始化表单数据
+	email := r.PostFormValue("email")
+	password := r.PostFormValue("password")
+
+	// 2. 尝试登录
+	if err := auth.Attempt(email, password); err == nil {
+		// 登录成功
+		http.Redirect(w, r, "/", http.StatusFound)
+	} else {
+		// 3. 登录失败，显示错误提示
+		view.RenderSimple(w, view.D{
+			"Error":    err.Error(),
+			"Email":    email,
+			"Password": password,
+		}, "auth.login")
+	}
 }
