@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/pudongping/goblog/pkg/auth"
+	"github.com/pudongping/goblog/pkg/flash"
 	"github.com/pudongping/goblog/pkg/logger"
 	"github.com/pudongping/goblog/pkg/route"
 )
@@ -28,6 +29,8 @@ func RenderSimple(w io.Writer, data D, tplFiles ...string) {
 func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
 	// 1. 通用模版数据
 	data["isLogined"] = auth.Check()
+	data["loginUser"] = auth.User
+	data["flash"] = flash.All()
 
 	// 2. 生成模版文件
 	allFiles := getTemplateFiles(tplFiles...)
