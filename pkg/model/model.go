@@ -1,6 +1,9 @@
 package model
 
 import (
+	"fmt"
+
+	"github.com/pudongping/goblog/pkg/config"
 	// GORM 的 MySQL 数据库驱动导入
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -17,18 +20,39 @@ func ConnectDB() *gorm.DB {
 
 	var err error
 
-	config := mysql.New(mysql.Config{
-		DSN: "root:123456@tcp(127.0.0.1:3306)/goblog?charset=utf8&parseTime=True&loc=Local",
+	var (
+		host     = config.GetString("database.mysql.host")
+		port     = config.GetString("database.mysql.port")
+		database = config.GetString("database.mysql.database")
+		username = config.GetString("database.mysql.username")
+		password = config.GetString("database.mysql.password")
+		charset  = config.GetString("database.mysql.charset")
+	)
+	//DSN: "root:123456@tcp(127.0.0.1:3306)/goblog?charset=utf8&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%t&loc=%s",
+		username, password, host, port, database, charset, true, "Local")
+
+	gormConfig := mysql.New(mysql.Config{
+		DSN: dsn,
 	})
 
+	var level gormlogger.LogLevel
+	if config.GetBool("app.debug") {
+		// 读取不到数据也会显示
+		level = gormlogger.Warn
+	} else {
+		// 只有错误才会显示
+		level = gormlogger.Error
+	}
+
 	// 准备数据库连接池
-	DB, err = gorm.Open(config, &gorm.Config{
+	DB, err = gorm.Open(gormConfig, &gorm.Config{
 		// 允许我们在命令行里查看请求的 sql 信息
 		// Silent —— 静默模式，不打印任何信息
 		// Error —— 发生错误了才打印
 		// Warn —— 发生警告级别以上的错误才打印
 		// Info —— 打印所有信息，包括 SQL 语句
-		Logger: gormlogger.Default.LogMode(gormlogger.Info),
+		Logger: gormlogger.Default.LogMode(level),
 	})
 
 	logger.LogError(err)
