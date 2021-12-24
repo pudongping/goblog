@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pudongping/goblog/app/models/user"
 	"github.com/pudongping/goblog/pkg/auth"
 	"github.com/pudongping/goblog/pkg/flash"
 	"github.com/pudongping/goblog/pkg/logger"
@@ -31,6 +32,7 @@ func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
 	data["isLogined"] = auth.Check()
 	data["loginUser"] = auth.User
 	data["flash"] = flash.All()
+	data["Users"], _ = user.All()  // 所有的用户信息
 
 	// 2. 生成模版文件
 	allFiles := getTemplateFiles(tplFiles...)
