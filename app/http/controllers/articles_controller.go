@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"unicode/utf8"
 
-	"github.com/pudongping/goblog/app/requests"
 	"gorm.io/gorm"
+
+	"github.com/pudongping/goblog/app/requests"
 
 	"github.com/pudongping/goblog/app/models/article"
 	"github.com/pudongping/goblog/pkg/logger"
@@ -33,7 +34,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		// 2. 加载模版
 		view.Render(w, view.D{
 			"Articles": articles,
-		}, "articles.index")
+		}, "articles.index", "articles._article_meta")
 	}
 
 }
@@ -62,7 +63,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		// 4. 读取成功，显示文章
 		view.Render(w, view.D{
 			"Article": article,
-		}, "articles.show")
+		}, "articles.show", "articles._article_meta")
 	}
 
 }
@@ -103,8 +104,8 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 
 	// 1. 初始化数据
 	_article := article.Article{
-		Title:     title,
-		Body:      body,
+		Title: title,
+		Body:  body,
 	}
 
 	// 2. 表单验证
@@ -119,7 +120,7 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 			indexURL := route.Name2URL("articles.show", "id", _article.GetStringID())
 			http.Redirect(w, r, indexURL, http.StatusFound)
 			// 第二个参数表示为转换为十进制
-			//fmt.Fprint(w, "插入成功， ID 为"+strconv.FormatUint(_article.ID, 10))
+			// fmt.Fprint(w, "插入成功， ID 为"+strconv.FormatUint(_article.ID, 10))
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "文章创建失败，500 服务器内部错误")
@@ -128,7 +129,7 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 
 		view.Render(w, view.D{
 			"Article": _article,
-			"Errors": errors,
+			"Errors":  errors,
 		}, "articles.create", "articles._form_field")
 
 	}
