@@ -49,6 +49,11 @@ func RegisterWebRoutes(r *mux.Router) {
 	// 退出登录，必须使用 POST 方法
 	r.HandleFunc("/auth/logout", middlewares.Auth(auc.Logout)).Methods("POST").Name("auth.logout")
 
+	// 用户相关
+	uc := new(controllers.UserController)
+	// 用户相关文章列表
+	r.HandleFunc("/users/{id:[0-9]+}", uc.Show).Methods("GET").Name("users.show")
+
 	// 设置静态资源路由
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
 	r.PathPrefix("/js/").Handler(http.FileServer(http.Dir("./public")))
