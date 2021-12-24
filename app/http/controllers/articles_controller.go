@@ -8,6 +8,7 @@ import (
 	"github.com/pudongping/goblog/app/models/article"
 	"github.com/pudongping/goblog/app/policies"
 	"github.com/pudongping/goblog/app/requests"
+	"github.com/pudongping/goblog/pkg/auth"
 	"github.com/pudongping/goblog/pkg/logger"
 	"github.com/pudongping/goblog/pkg/route"
 	"github.com/pudongping/goblog/pkg/view"
@@ -89,11 +90,13 @@ func (ac *ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 
 	title := r.PostFormValue("title")
 	body := r.PostFormValue("body")
+	currentUser := auth.User()
 
 	// 1. 初始化数据
 	_article := article.Article{
-		Title: title,
-		Body:  body,
+		Title:  title,
+		Body:   body,
+		UserID: currentUser.ID,
 	}
 
 	// 2. 表单验证
