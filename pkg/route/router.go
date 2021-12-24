@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/pudongping/goblog/pkg/config"
 	"github.com/pudongping/goblog/pkg/logger"
 )
 
@@ -12,7 +13,7 @@ import (
 var route *mux.Router
 
 // SetRoute 设置路由实例，以供 Name2URL 等函数使用
-func SetRoute(r *mux.Router)  {
+func SetRoute(r *mux.Router) {
 	route = r
 }
 
@@ -24,7 +25,7 @@ func Name2URL(routeName string, pairs ...string) string {
 		return ""
 	}
 
-	return url.String()
+	return config.GetString("app.url") + url.String()
 }
 
 // GetRouteVariable 获取 URI 路由参数

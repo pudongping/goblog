@@ -1,8 +1,12 @@
 package article
 
 import (
+	"net/http"
+
 	"github.com/pudongping/goblog/pkg/logger"
 	"github.com/pudongping/goblog/pkg/model"
+	"github.com/pudongping/goblog/pkg/pagination"
+	"github.com/pudongping/goblog/pkg/route"
 	"github.com/pudongping/goblog/pkg/types"
 )
 
@@ -19,15 +23,27 @@ func Get(idstr string) (Article, error) {
 }
 
 // GetAll 获取全部文章
-func GetAll() ([]Article, error) {
+func GetAll(r *http.Request, perPage int) ([]Article, pagination.ViewData, error) {
+
+	// 1. 初始化分页实例
+	db := model.DB.Model(Article{}).Order("created_at desc")
+	_pager := pagination.New(r, db, route.Name2URL("articles.index"), perPage)
+
+	// 2. 获取视图数据
+	viewData := _pager.Paging()
+
+	// 3. 获取数据
 	var articles []Article
+	_pager.Results(&articles)
+
 	// 使用 Preload 方法读取关联
 	// 可以追加 .Debug() 方法用于调试单条模型的 sql 语句
-	if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
-		logger.LogError(err)
-		return articles, err
-	}
-	return articles, nil
+	// if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
+	// 	logger.LogError(err)
+	// 	return articles, err
+	// }
+
+	return articles, viewData, nil
 }
 
 // GetByUserID 通过用户 id 获取全部文章
