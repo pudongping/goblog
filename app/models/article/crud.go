@@ -10,7 +10,7 @@ import (
 func Get(idstr string) (Article, error) {
 	var article Article
 	id := types.StringToUint64(idstr)
-	if err := model.DB.First(&article, id).Error; err != nil {
+	if err := model.DB.Preload("User").First(&article, id).Error; err != nil {
 		return article, err
 	}
 
@@ -20,7 +20,9 @@ func Get(idstr string) (Article, error) {
 // GetAll 获取全部文章
 func GetAll() ([]Article, error) {
 	var articles []Article
-	if err := model.DB.Find(&articles).Error; err != nil {
+	// 使用 Preload 方法读取关联
+	// 可以追加 .Debug() 方法用于调试单条模型的 sql 语句
+	if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
 		return articles, err
 	}
 	return articles, nil
