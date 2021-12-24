@@ -26,28 +26,28 @@ func RegisterWebRoutes(r *mux.Router) {
 	// 文章列表
 	r.HandleFunc("/articles", ac.Index).Methods("GET").Name("articles.index")
 	// 文章创建显示
-	r.HandleFunc("/articles/create", ac.Create).Methods("GET").Name("articles.create")
+	r.HandleFunc("/articles/create", middlewares.Auth(ac.Create)).Methods("GET").Name("articles.create")
 	// 文章创建数据提交
-	r.HandleFunc("/articles", ac.Store).Methods("POST").Name("articles.store")
+	r.HandleFunc("/articles", middlewares.Auth(ac.Store)).Methods("POST").Name("articles.store")
 	// 更新文章显示
-	r.HandleFunc("/articles/{id:[0-9]+}/edit", ac.Edit).Methods("GET").Name("articles.edit")
+	r.HandleFunc("/articles/{id:[0-9]+}/edit", middlewares.Auth(ac.Edit)).Methods("GET").Name("articles.edit")
 	// 更新文章数据提交
-	r.HandleFunc("/articles/{id:[0-9]+}", ac.Update).Methods("POST").Name("articles.update")
+	r.HandleFunc("/articles/{id:[0-9]+}", middlewares.Auth(ac.Update)).Methods("POST").Name("articles.update")
 	// 删除文章
-	r.HandleFunc("/articles/{id:[0-9]+}/delete", ac.Delete).Methods("POST").Name("articles.delete")
+	r.HandleFunc("/articles/{id:[0-9]+}/delete", middlewares.Auth(ac.Delete)).Methods("POST").Name("articles.delete")
 
 	// 用户认证
 	auc := new(controllers.AuthController)
 	// 注册页面
-	r.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
+	r.HandleFunc("/auth/register", middlewares.Guest(auc.Register)).Methods("GET").Name("auth.register")
 	// 处理注册逻辑
-	r.HandleFunc("/auth/do-register", auc.DoRegister).Methods("POST").Name("auth.doregister")
+	r.HandleFunc("/auth/do-register", middlewares.Guest(auc.DoRegister)).Methods("POST").Name("auth.doregister")
 	// 登录显示页面
-	r.HandleFunc("/auth/login", auc.Login).Methods("GET").Name("auth.login")
+	r.HandleFunc("/auth/login", middlewares.Guest(auc.Login)).Methods("GET").Name("auth.login")
 	// 处理登录逻辑
-	r.HandleFunc("/auth/dologin", auc.DoLogin).Methods("POST").Name("auth.dologin")
+	r.HandleFunc("/auth/dologin", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.dologin")
 	// 退出登录，必须使用 POST 方法
-	r.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
+	r.HandleFunc("/auth/logout", middlewares.Auth(auc.Logout)).Methods("POST").Name("auth.logout")
 
 	// 设置静态资源路由
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
