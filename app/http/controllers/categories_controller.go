@@ -53,3 +53,8 @@ func (c *CategoriesController) Store(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+// Show 显示分类下的文章列表
+func (c *CategoriesController) Show(w http.ResponseWriter, r *http.Request) {
+
+}
