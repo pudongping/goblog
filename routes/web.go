@@ -36,6 +36,13 @@ func RegisterWebRoutes(r *mux.Router) {
 	// 删除文章
 	r.HandleFunc("/articles/{id:[0-9]+}/delete", middlewares.Auth(ac.Delete)).Methods("POST").Name("articles.delete")
 
+	// 文章分类
+	cc := new(controllers.CategoriesController)
+	// 分类创建显示
+	r.HandleFunc("/categories/create", middlewares.Auth(cc.Create)).Methods("GET").Name("categories.create")
+	// 分类创建数据提交
+	r.HandleFunc("/categories", middlewares.Auth(cc.Store)).Methods("POST").Name("categories.store")
+
 	// 用户认证
 	auc := new(controllers.AuthController)
 	// 注册页面
