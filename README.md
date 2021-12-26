@@ -2,6 +2,12 @@
 
 一个简易的基于 go 语言开发的博客项目。
 
+## 创建数据库
+
+```shell
+CREATE DATABASE goblog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
 ## 编译运行
 
 ```shell
