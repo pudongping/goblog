@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"net/http"
 
@@ -17,6 +18,19 @@ var router *mux.Router
 
 //var db *sql.DB
 
+// embed 读取相对路径是相对于书写 //go:embed 指令的 .go 文件的
+// go:embed 我们称之为指令，后面跟着文件目录，或者是单个文件，支持通配符。public/* 意味着递归加载 public 下所有子目录以及文件
+// embed.FS 就是一个打包在二进制包里的文件系统；
+// //go:embed 指令是告知要加载哪些文件目录；
+// 加载和读取目录时，会 保持原有的目录结构；
+// 除了写功能，你可以将其当做一般文件系统来读取里面的文件和目录。
+
+//go:embed resources/views/articles/*
+//go:embed resources/views/auth/*
+//go:embed resources/views/categories/*
+//go:embed resources/views/layouts/*
+var tplFS embed.FS
+
 func init() {
 	// 初始化配置信息
 	config.Initialize()
@@ -29,6 +43,10 @@ func main() {
 
 	// 初始化 gorm
 	bootstrap.SetupDB()
+
+	// 初始化模版
+	bootstrap.SetupTemplate(tplFS)
+
 	// 初始化路由绑定
 	router = bootstrap.SetupRoute()
 
