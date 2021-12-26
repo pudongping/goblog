@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/pudongping/goblog/app/models/article"
 	"github.com/pudongping/goblog/app/models/category"
 	"github.com/pudongping/goblog/app/requests"
 	"github.com/pudongping/goblog/pkg/flash"
@@ -56,5 +57,26 @@ func (c *CategoriesController) Store(w http.ResponseWriter, r *http.Request) {
 
 // Show 显示分类下的文章列表
 func (c *CategoriesController) Show(w http.ResponseWriter, r *http.Request) {
+
+	// 1. 获取 URL 参数
+	id := route.GetRouteVariable("id", r)
+
+	// 2. 读取对应的数据
+	_category, err := category.Get(id)
+
+	// 3. 获取结果集
+	articles, pagerData, err := article.GetByCategoryID(_category.GetStringID(), r, 2)
+
+	if err != nil {
+		c.ResponseForSQLError(w, err)
+	} else {
+
+		// 加载模版
+		view.Render(w, view.D{
+			"Articles":  articles,
+			"PagerData": pagerData,
+		}, "articles.index", "articles._article_meta")
+
+	}
 
 }
