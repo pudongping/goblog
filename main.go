@@ -31,6 +31,9 @@ var router *mux.Router
 //go:embed resources/views/layouts/*
 var tplFS embed.FS
 
+//go:embed public/*
+var staticFS embed.FS
+
 func init() {
 	// 初始化配置信息
 	config.Initialize()
@@ -48,7 +51,7 @@ func main() {
 	bootstrap.SetupTemplate(tplFS)
 
 	// 初始化路由绑定
-	router = bootstrap.SetupRoute()
+	router = bootstrap.SetupRoute(staticFS)
 
 	// 通过命名路由获取 URL 示例
 	homeURL, _ := router.Get("home").URL()
