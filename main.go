@@ -54,8 +54,10 @@ func main() {
 	router = bootstrap.SetupRoute(staticFS)
 
 	// 通过命名路由获取 URL 示例
-	homeURL, _ := router.Get("home").URL()
-	fmt.Println("homeURL: ", homeURL)
+	//homeURL, _ := router.Get("home").URL()
+	//fmt.Println("homeURL: ", homeURL)
+
+	fmt.Printf("app is running at http://localhost:%s\n", c.GetString("app.port"))
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", c.GetString("app.port")), middlewares.RemoveTrailingSlash(router))
 	logger.LogError(err)
