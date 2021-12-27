@@ -15,5 +15,5 @@
 # vendor/
 .idea
 tmp/*
-!data/.gitkeep
+!tmp/.gitkeep
 .env
